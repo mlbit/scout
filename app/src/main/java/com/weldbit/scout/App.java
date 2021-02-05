@@ -3,6 +3,7 @@
  */
 package com.weldbit.scout;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.*;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -63,8 +64,10 @@ public class App {
         TableLedger tLedger = new TableLedger();
         tLedger.setTablename("what filename");
 
-        try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger)) {
+        try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger, DataStorage.ACCESS_TYPE.WRITE)) {
             tblLedger.insert();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

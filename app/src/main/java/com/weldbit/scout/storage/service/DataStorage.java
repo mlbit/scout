@@ -2,24 +2,24 @@ package com.weldbit.scout.storage.service;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
 
-import com.weldbit.scout.storage.annotations.PrimaryKey;
 import com.weldbit.scout.storage.annotations.WeldbitData;
+import com.weldbit.scout.storage.model.DataHeader;
+import com.weldbit.scout.tools.FileUtils;
 
 import lombok.Data;
 
 @Data
 public class DataStorage<T> implements Closeable {
 
+    private final String FILE_EXT = ".dad";
     private T objModel;
     private String systemFilename;
     private WeldbitData weldbitdata;
@@ -38,8 +38,6 @@ public class DataStorage<T> implements Closeable {
     }
 
     public DataStorage(T objModel, ACCESS_TYPE aType) {
-        // Open file and load into memory record management
-        // 1. Retrieve tablename from class Object annotable
         this.objModel = objModel;
         this.accessType = aType;
         initialize();
@@ -60,8 +58,11 @@ public class DataStorage<T> implements Closeable {
 
     public void close() {
         try {
-            writerStream.close();
-            readerStream.close();
+            if (writerStream != null)
+                writerStream.close();
+            if (readerStream != null)
+                readerStream.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,7 +82,8 @@ public class DataStorage<T> implements Closeable {
         } else {
             this.weldbitdata = clazz.getAnnotation(WeldbitData.class);
             // Get the system filename that store the data
-            this.systemFilename = weldbitdata.value().isEmpty() ? this.clazz.getSimpleName() : weldbitdata.value();
+            this.systemFilename = (weldbitdata.value().isEmpty() ? this.clazz.getSimpleName() : weldbitdata.value())
+                    + FILE_EXT;
             path = Paths.get(systemFilename);
 
         }
@@ -94,16 +96,21 @@ public class DataStorage<T> implements Closeable {
      * updating/inserting records
      *
      */
-    private void openWriterFile() {
+    private void openWriterFile()  {
         try {
+            var fileExist = Files.exists(path);
             writerStream = Files.newByteChannel(path, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            if (!fileExist) {
+                String pureFilename = FileUtils.filename(path.toString());
+                var dataHeader = new DataHeader();
+                dataHeader.setFilename(pureFilename);
 
-            ByteBuffer buffer = ByteBuffer.wrap("Hello".getBytes());
-            System.out.println("Size :" + writerStream.size());
-            writerStream.position(writerStream.size() > 0 ? writerStream.size() - 1 : writerStream.size());
-            while (buffer.hasRemaining()) {
-                int write = writerStream.write(buffer);
-                System.out.println("Number of written bytes:" + write);
+                String jsonheader = AnnotationProcessor.jsonString(dataHeader);
+                ByteBuffer buffer = ByteBuffer.wrap(jsonheader.getBytes());
+
+                while (buffer.hasRemaining()) {
+                    writerStream.write(buffer);
+                }
             }
 
         } catch (IOException e) {
@@ -123,28 +130,29 @@ public class DataStorage<T> implements Closeable {
         }
     }
 
-    public boolean insert() {
+    public boolean insert() throws IOException {
         if (this.objModel == null) {
             System.out.print("Model object can't be null");
             return false;
         }
+        StringBuilder fieldsInfo = new StringBuilder();
+        try {
+            fieldsInfo.append(AnnotationProcessor.jsonString(objModel));
+            fieldsInfo.append(System.lineSeparator());
 
-        Class<?> clazz = objModel.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(PrimaryKey.class)) {
-                try {
-                    field.setAccessible(true);
-                    System.out.println("");
-                    System.out.println("Annotated Primary Key field." + field.getName() + ":" + field.get(objModel));
-                } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
         }
+
+        ByteBuffer buffer = ByteBuffer.wrap(fieldsInfo.toString().getBytes());
+        System.out.println("Size :" + writerStream.size());
+        writerStream.position(writerStream.size());
+        while (buffer.hasRemaining()) {
+            int write = writerStream.write(buffer);
+            System.out.println("Number of written bytes:" + write);
+        }
+
+        System.out.println(fieldsInfo);
         return true;
     }
 }

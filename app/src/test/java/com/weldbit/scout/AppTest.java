@@ -6,9 +6,22 @@ package com.weldbit.scout;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import com.weldbit.scout.tools.FileUtils;
+
 class AppTest {
-    @Test void appHasAGreeting() {
+    @Test
+    void appHasAGreeting() {
         App classUnderTest = new App();
         assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
+    }
+
+    @Test
+    void pathTest() {
+        Path path = Paths.get("abc/myname");
+        System.out.println(FileUtils.filename(path.toString()));
+        assertTrue(true);
     }
 }
