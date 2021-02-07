@@ -96,7 +96,7 @@ public class DataStorage<T> implements Closeable {
      * updating/inserting records
      *
      */
-    private void openWriterFile()  {
+    private void openWriterFile() {
         try {
             var fileExist = Files.exists(path);
             writerStream = Files.newByteChannel(path, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
@@ -105,12 +105,17 @@ public class DataStorage<T> implements Closeable {
                 var dataHeader = new DataHeader();
                 dataHeader.setFilename(pureFilename);
 
-                String jsonheader = AnnotationProcessor.jsonString(dataHeader);
-                ByteBuffer buffer = ByteBuffer.wrap(jsonheader.getBytes());
-
-                while (buffer.hasRemaining()) {
-                    writerStream.write(buffer);
+                String jsonheader;
+                try {
+                    ByteBuffer buffer = ByteBuffer.wrap(dataHeader.getBytes());
+                    while (buffer.hasRemaining()) {
+                        writerStream.write(buffer);
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
+
             }
 
         } catch (IOException e) {
@@ -154,5 +159,14 @@ public class DataStorage<T> implements Closeable {
 
         System.out.println(fieldsInfo);
         return true;
+    }
+
+    public String readRecord() {
+        if (this.objModel == null) {
+            System.out.println("Model object can't be null");
+            return null;
+        }
+        readerStream.
+
     }
 }
