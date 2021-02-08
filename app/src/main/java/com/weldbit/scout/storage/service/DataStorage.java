@@ -20,13 +20,17 @@ import lombok.Data;
 public class DataStorage<T> implements Closeable {
 
     private final String FILE_EXT = ".dad";
+    private final String FILE_IDX = ".idx";
     private T objModel;
-    private String systemFilename;
+    private String systemDataFilename;
+    private String systemIdxFilename;
+
     private WeldbitData weldbitdata;
     private Class<?> clazz;
     private SeekableByteChannel writerStream;
     private SeekableByteChannel readerStream;
-    private Path path;
+    private Path pathData;
+    private Path pathIdx;
     private ACCESS_TYPE accessType;
 
     public enum ACCESS_TYPE {
@@ -82,9 +86,9 @@ public class DataStorage<T> implements Closeable {
         } else {
             this.weldbitdata = clazz.getAnnotation(WeldbitData.class);
             // Get the system filename that store the data
-            this.systemFilename = (weldbitdata.value().isEmpty() ? this.clazz.getSimpleName() : weldbitdata.value())
+            this.systemDataFilename = (weldbitdata.value().isEmpty() ? this.clazz.getSimpleName() : weldbitdata.value())
                     + FILE_EXT;
-            path = Paths.get(systemFilename);
+            pathData = Paths.get(systemDataFilename);
 
         }
 
@@ -98,10 +102,10 @@ public class DataStorage<T> implements Closeable {
      */
     private void openWriterFile() {
         try {
-            var fileExist = Files.exists(path);
-            writerStream = Files.newByteChannel(path, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            var fileExist = Files.exists(pathData);
+            writerStream = Files.newByteChannel(pathData, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
             if (!fileExist) {
-                String pureFilename = FileUtils.filename(path.toString());
+                String pureFilename = FileUtils.filename(pathData.toString());
                 var dataHeader = new DataHeader();
                 dataHeader.setFilename(pureFilename);
 
@@ -129,7 +133,7 @@ public class DataStorage<T> implements Closeable {
      */
     private void openReaderFile() {
         try {
-            readerStream = Files.newByteChannel(path, EnumSet.of(StandardOpenOption.READ));
+            readerStream = Files.newByteChannel(pathData, EnumSet.of(StandardOpenOption.READ));
         } catch (IOException e) {
             e.printStackTrace();
         }
