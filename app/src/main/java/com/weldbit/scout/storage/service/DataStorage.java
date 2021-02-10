@@ -28,7 +28,11 @@ public class DataStorage<T> implements Closeable {
     private WeldbitData weldbitdata;
     private Class<?> clazz;
     private SeekableByteChannel writerStream;
+    private SeekableByteChannel writerIndexStream;
+
     private SeekableByteChannel readerStream;
+    private SeekableByteChannel readerIndexStream;
+
     private Path pathData;
     private Path pathIdx;
     private ACCESS_TYPE accessType;
@@ -66,6 +70,10 @@ public class DataStorage<T> implements Closeable {
                 writerStream.close();
             if (readerStream != null)
                 readerStream.close();
+            if (writerIndexStream != null)
+                writerIndexStream.close();
+            if (readerIndexStream != null)
+                readerIndexStream.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,6 +98,11 @@ public class DataStorage<T> implements Closeable {
                     + FILE_EXT;
             pathData = Paths.get(systemDataFilename);
 
+            // Create index file.
+            this.systemIdxFilename = (weldbitdata.value().isEmpty() ? this.clazz.getSimpleName() : weldbitdata.value())
+                    + FILE_IDX;
+            pathIdx = Paths.get(systemIdxFilename);
+
         }
 
         return true;
@@ -102,26 +115,57 @@ public class DataStorage<T> implements Closeable {
      */
     private void openWriterFile() {
         try {
-            var fileExist = Files.exists(pathData);
-            writerStream = Files.newByteChannel(pathData, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-            if (!fileExist) {
-                String pureFilename = FileUtils.filename(pathData.toString());
-                var dataHeader = new DataHeader();
-                dataHeader.setFilename(pureFilename);
+            var pathDataExist = Files.exists(pathData);
 
-                String jsonheader;
-                try {
-                    ByteBuffer buffer = ByteBuffer.wrap(dataHeader.getBytes());
-                    while (buffer.hasRemaining()) {
-                        writerStream.write(buffer);
-                    }
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
+            writerStream = Files.newByteChannel(pathData,
+                    EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            if (!pathDataExist) {
+                addHeaderInfo(writerStream, pathData);
             }
+            createIndexFile(pathIdx);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    /**
+     * Add Header information to the new file that's created
+     *
+     * @param path - the filename
+     */
+    private void addHeaderInfo(SeekableByteChannel fileStream, Path path) {
+        // Add header information if it's a new file.
+        String pureFilename = FileUtils.filename(path.toString());
+        var dataHeader = new DataHeader();
+        dataHeader.setFilename(pureFilename);
+        System.out.println("DataHeader : " + dataHeader.toString());
+
+        String jsonheader;
+        try {
+            ByteBuffer buffer = ByteBuffer.wrap(dataHeader.getBytes());
+            while (buffer.hasRemaining()) {
+                fileStream.write(buffer);
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Create the an index file that will be use to quickly search records.
+     *
+     * @param path - filename information
+     */
+    private void createIndexFile(Path path) {
+        try {
+            var fileExist = Files.exists(path);
+            if (!fileExist) {
+                writerIndexStream = Files.newByteChannel(path,
+                        EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+                addHeaderInfo(writerIndexStream, path);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -170,7 +214,7 @@ public class DataStorage<T> implements Closeable {
             System.out.println("Model object can't be null");
             return null;
         }
-        readerStream.
+        return "none";
 
     }
 }

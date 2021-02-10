@@ -28,38 +28,40 @@ public class App {
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://www.google.com/")).build();
+        // System.out.println(new App().getGreeting());
+        // HttpClient client = HttpClient.newHttpClient();
+        // HttpRequest request =
+        // HttpRequest.newBuilder().uri(URI.create("http://www.google.com/")).build();
 
-        String htmldoc;
-        htmldoc = client.sendAsync(request, BodyHandlers.ofString()).thenApply(HttpResponse::body).join();
-        // System.out.println(htmldoc);
-        Document doc = Jsoup.parse(htmldoc);
+        // String htmldoc;
+        // htmldoc = client.sendAsync(request,
+        // BodyHandlers.ofString()).thenApply(HttpResponse::body).join();
+        // // System.out.println(htmldoc);
+        // Document doc = Jsoup.parse(htmldoc);
 
-        String text = doc.body().text(); // "An example link"
+        // String text = doc.body().text(); // "An example link"
 
-        System.out.println(doc.title());
+        // System.out.println(doc.title());
 
-        List squares = new ArrayList();
-        Flowable.range(1, 64) // 1
-                .observeOn(Schedulers.computation()) // 2
-                .map(v -> v * v) // 3
-                .blockingSubscribe(squares::add); // 4
+        // List squares = new ArrayList();
+        // Flowable.range(1, 64) // 1
+        // .observeOn(Schedulers.computation()) // 2
+        // .map(v -> v * v) // 3
+        // .blockingSubscribe(squares::add); // 4
 
-        for (Object object : squares) {
-            System.out.println(object);
-        }
+        // for (Object object : squares) {
+        // System.out.println(object);
+        // }
 
-        Stack<Integer> mystack = new Stack<Integer>();
-        mystack.push(1);
-        System.out.println(mystack.getTop());
+        // Stack<Integer> mystack = new Stack<Integer>();
+        // mystack.push(1);
+        // System.out.println(mystack.getTop());
 
-        DataAccessBase tableLedger = new TableLedgerDAO();
-        tableLedger.createTable();
-        System.out.println(tableLedger.readTable());
-        System.out.println("Stream below");
-        tableLedger.readTable();
+        // DataAccessBase tableLedger = new TableLedgerDAO();
+        // tableLedger.createTable();
+        // System.out.println(tableLedger.readTable());
+        // System.out.println("Stream below");
+        // tableLedger.readTable();
 
         TableLedger tLedger = new TableLedger();
         tLedger.setTablename("what filename");

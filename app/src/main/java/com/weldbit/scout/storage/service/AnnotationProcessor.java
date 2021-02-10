@@ -1,11 +1,13 @@
 package com.weldbit.scout.storage.service;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.weldbit.scout.storage.annotations.Column;
+import com.weldbit.scout.storage.annotations.NotEmpty;
 import com.weldbit.scout.storage.annotations.PrimaryKey;
 
 public class AnnotationProcessor {
@@ -16,6 +18,9 @@ public class AnnotationProcessor {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (field.isAnnotationPresent(Column.class)) {
+                if (field.isAnnotationPresent(NotEmpty.class) && field.get(object) == null) {
+                    throw IOException("Empty value :");
+                }
                 jsonElementsMap.put(field.getName(), (String) field.get(object));
             } else if (field.isAnnotationPresent(PrimaryKey.class)) {
                 jsonElementsMapColumnKey.put(field.getName(), (String) field.get(object));
