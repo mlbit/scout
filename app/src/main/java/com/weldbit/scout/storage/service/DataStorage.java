@@ -208,6 +208,7 @@ public class DataStorage<T> implements Closeable {
             int write = writerStream.write(buffer);
             System.out.println("Number of written bytes:" + write);
         }
+        System.out.println(fieldsInfo);
 
         IndexFile indexFile = new IndexFile();
         indexFile.setHashIdx(hashInfo.toString());
@@ -216,11 +217,13 @@ public class DataStorage<T> implements Closeable {
         System.out.println("writerIndexStream : " + (writerIndexStream != null ? "YES" : "NULL"));
         long indexSize = writerIndexStream.size();
         System.out.print(("Index Size :" + indexSize));
-        // writerIndexStream.position(indexSize);
-        // while (idxBuffer.hasRemaining()) {
-        //     int write = writerIndexStream.write(idxBuffer);
-        // }
-        System.out.println(fieldsInfo);
+        writerIndexStream.position(indexSize);
+        while (idxBuffer.hasRemaining()) {
+            int write = writerIndexStream.write(idxBuffer);
+            System.out.println("Index size save:" + write);
+        }
+        System.out.println(indexFile);
+
         return true;
     }
 
