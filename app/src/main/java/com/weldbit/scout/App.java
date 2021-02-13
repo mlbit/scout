@@ -72,10 +72,10 @@ public class App {
             e.printStackTrace();
         }
 
-        try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger, DataStorage.ACCESS_TYPE.WRITE)) {
-            tblLedger.insert();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger, DataStorage.ACCESS_TYPE.WRITE)) {
+        //     tblLedger.insert();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }
 }

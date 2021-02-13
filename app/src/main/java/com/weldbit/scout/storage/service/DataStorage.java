@@ -12,6 +12,7 @@ import java.util.EnumSet;
 
 import com.weldbit.scout.storage.annotations.WeldbitData;
 import com.weldbit.scout.storage.model.DataHeader;
+import com.weldbit.scout.storage.model.IndexFile;
 import com.weldbit.scout.tools.FileUtils;
 
 import lombok.Data;
@@ -65,6 +66,7 @@ public class DataStorage<T> implements Closeable {
     }
 
     public void close() {
+        System.out.println("Closing Stream");
         try {
             if (writerStream != null)
                 writerStream.close();
@@ -160,12 +162,9 @@ public class DataStorage<T> implements Closeable {
      */
     private void createIndexFile(Path path) {
         try {
-            var fileExist = Files.exists(path);
-            if (!fileExist) {
-                writerIndexStream = Files.newByteChannel(path,
-                        EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
-                addHeaderInfo(writerIndexStream, path);
-            }
+            this.writerIndexStream = Files.newByteChannel(path,
+                    EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE));
+            addHeaderInfo(writerIndexStream, path);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,10 +187,15 @@ public class DataStorage<T> implements Closeable {
             System.out.print("Model object can't be null");
             return false;
         }
+        StringBuilder hashInfo = new StringBuilder();
         StringBuilder fieldsInfo = new StringBuilder();
+
         try {
-            fieldsInfo.append(AnnotationProcessor.jsonString(objModel));
+            AnnotationProcessor<T> annotationProcessor = new AnnotationProcessor<>(objModel);
+            fieldsInfo.append(annotationProcessor.jsonString());
             fieldsInfo.append(System.lineSeparator());
+
+            hashInfo.append(annotationProcessor.primaryKeyHash());
 
         } catch (IllegalArgumentException | IllegalAccessException e) {
             e.printStackTrace();
@@ -205,6 +209,17 @@ public class DataStorage<T> implements Closeable {
             System.out.println("Number of written bytes:" + write);
         }
 
+        IndexFile indexFile = new IndexFile();
+        indexFile.setHashIdx(hashInfo.toString());
+        ByteBuffer idxBuffer = ByteBuffer.wrap(indexFile.toString().getBytes());
+        // Set the position on where to start writing the data
+        System.out.println("writerIndexStream : " + (writerIndexStream != null ? "YES" : "NULL"));
+        long indexSize = writerIndexStream.size();
+        System.out.print(("Index Size :" + indexSize));
+        // writerIndexStream.position(indexSize);
+        // while (idxBuffer.hasRemaining()) {
+        //     int write = writerIndexStream.write(idxBuffer);
+        // }
         System.out.println(fieldsInfo);
         return true;
     }
