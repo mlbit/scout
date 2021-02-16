@@ -224,10 +224,7 @@ public class DataStorage<T> implements Closeable {
         long indexSize = writerIndexStream.size();
         System.out.print(("Index Size :" + indexSize));
         writerIndexStream.position(indexSize);
-        while (idxBuffer.hasRemaining()) {
-            int write = writerIndexStream.write(idxBuffer);
-            System.out.println("Index size save:" + write);
-        }
+        insertWriter(writerIndexStream, idxBuffer);
         System.out.println(indexFile);
 
         return true;
