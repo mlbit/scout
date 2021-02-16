@@ -1,9 +1,9 @@
 # Data Files
 ## Filename Extension 
-- .dff - data file format
-- .dmf - data memory format
-- .dfa - data file access
-- .ifa - index file access
+- DFF (.dff) - Data File Format provides information on how the data are stored in Data File Content (.dfc).  
+- DMF (.dmf) - Data Memory Format provides information on how the data are stored in memory.
+- DFC (.dfc) - Data File Content store the actual data stored in the file system.
+- IFC (.ifc) - Index File Content store the record index of the file content in DFC. This file can be regenerated from the actual content file.
 ```flow
 st=>start: Start:>http://google.com[blank]
 e=>end:>http://www.google.com

@@ -203,16 +203,22 @@ public class DataStorage<T> implements Closeable {
 
         ByteBuffer buffer = ByteBuffer.wrap(fieldsInfo.toString().getBytes());
         System.out.println("Size :" + writerStream.size());
-        writerStream.position(writerStream.size());
+        long positionToInsert = writerStream.size();
+        writerStream.position(positionToInsert);
         while (buffer.hasRemaining()) {
             int write = writerStream.write(buffer);
             System.out.println("Number of written bytes:" + write);
         }
-        System.out.println(fieldsInfo);
+       System.out.println(fieldsInfo);
 
         IndexFile indexFile = new IndexFile();
         indexFile.setHashIdx(hashInfo.toString());
+        indexFile.setPosition(positionToInsert);
         ByteBuffer idxBuffer = ByteBuffer.wrap(indexFile.toString().getBytes());
+        idxBuffer.position(indexFile.toString().getBytes().length);
+        idxBuffer.put("where".getBytes());
+        idxBuffer.put(System.lineSeparator().getBytes());
+        idxBuffer.position(0);
         // Set the position on where to start writing the data
         System.out.println("writerIndexStream : " + (writerIndexStream != null ? "YES" : "NULL"));
         long indexSize = writerIndexStream.size();
@@ -227,6 +233,15 @@ public class DataStorage<T> implements Closeable {
         return true;
     }
 
+    private void insertWriter(SeekableByteChannel  seekableByteChannel, ByteBuffer byteBuffer) {
+        while (byteBuffer.hasRemaining()) {
+            try {
+                int write = seekableByteChannel.write(byteBuffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }       
+    }
     public String readRecord() {
         if (this.objModel == null) {
             System.out.println("Model object can't be null");
