@@ -187,15 +187,14 @@ public class DataStorage<T> implements Closeable {
             System.out.print("Model object can't be null");
             return false;
         }
-        StringBuilder hashInfo = new StringBuilder();
+        String hashInfo=null;
         StringBuilder fieldsInfo = new StringBuilder();
 
         try {
             AnnotationProcessor<T> annotationProcessor = new AnnotationProcessor<>(objModel);
             fieldsInfo.append(annotationProcessor.jsonString());
             fieldsInfo.append(System.lineSeparator());
-
-            hashInfo.append(annotationProcessor.primaryKeyHash());
+            hashInfo = annotationProcessor.primaryKeyHash();
 
         } catch (IllegalArgumentException | IllegalAccessException e) {
             e.printStackTrace();
@@ -210,24 +209,8 @@ public class DataStorage<T> implements Closeable {
             System.out.println("Number of written bytes:" + write);
         }
        System.out.println(fieldsInfo);
-
-        IndexFile indexFile = new IndexFile();
-        indexFile.setHashIdx(hashInfo.toString());
-        indexFile.setPosition(positionToInsert);
-        ByteBuffer idxBuffer = ByteBuffer.wrap(indexFile.toString().getBytes());
-        idxBuffer.position(indexFile.toString().getBytes().length);
-        idxBuffer.put("where".getBytes());
-        idxBuffer.put(System.lineSeparator().getBytes());
-        idxBuffer.position(0);
-        // Set the position on where to start writing the data
-        System.out.println("writerIndexStream : " + (writerIndexStream != null ? "YES" : "NULL"));
-        long indexSize = writerIndexStream.size();
-        System.out.print(("Index Size :" + indexSize));
-        writerIndexStream.position(indexSize);
-        insertWriter(writerIndexStream, idxBuffer);
-        System.out.println(indexFile);
-
-        return true;
+       recordIndexData(hashInfo,positionToInsert);
+       return true;
     }
 
     private void insertWriter(SeekableByteChannel  seekableByteChannel, ByteBuffer byteBuffer) {
@@ -239,6 +222,36 @@ public class DataStorage<T> implements Closeable {
             }
         }       
     }
+
+    /**
+     * Save the index record into a file. The data will have the
+     * key and position of record in the data file
+     * @param indexKeyInfo
+     * @param position
+     */
+    private void recordIndexData(String indexKeyInfo, long position) {
+        IndexFile indexFile = new IndexFile();
+        indexFile.setHashIdx(indexKeyInfo);
+        indexFile.setPosition(position);
+        StringBuilder indexdata = new StringBuilder(indexFile.toString());
+        indexdata.append(System.lineSeparator());
+
+        ByteBuffer idxBuffer = ByteBuffer.wrap(indexdata.toString().getBytes());
+        // Set the position on where to start writing the data
+        System.out.println("writerIndexStream : " + (writerIndexStream != null ? "YES" : "NULL"));
+        long indexSize;
+        try {
+            indexSize = writerIndexStream.size();
+            System.out.print(("Index Size :" + indexSize));
+            writerIndexStream.position(indexSize);
+            insertWriter(writerIndexStream, idxBuffer);
+            System.out.println(indexFile);            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    
     public String readRecord() {
         if (this.objModel == null) {
             System.out.println("Model object can't be null");
