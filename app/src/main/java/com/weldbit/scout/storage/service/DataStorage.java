@@ -21,7 +21,7 @@ import lombok.Data;
 public class DataStorage<T> implements Closeable {
 
     private final String FILE_EXT = ".dad";
-    private final String FILE_IDX = ".idx";
+    private final String FILE_IDX = ".pki";
     private T objModel;
     private String systemDataFilename;
     private String systemIdxFilename;
@@ -149,7 +149,6 @@ public class DataStorage<T> implements Closeable {
                 fileStream.write(buffer);
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
