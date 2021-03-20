@@ -6,10 +6,11 @@ import com.weldbit.scout.storage.network.NetworkNodesInfo;
 
 public class FileUtils {
 
-    public static String DATA_FILE_EXT = ".dfc" // The file extension of the Data File Content. Data File Content store
+    public static String DATA_FILE_EXT = ".dfc"; // The file extension of the Data File Content. Data File Content store
     // the actual data stored in the file system.
-    public static String INDEX_FILE_EXT = ".ifc" // Index File Content store the record index of the file content in DFC.
-                                               // This file can be regenerated from the actual content file.
+    public static String INDEX_FILE_EXT = ".ifc"; // Index File Content store the record index of the file content in
+                                                  // DFC.
+                                                  // This file can be regenerated from the actual content file.
 
     private FileUtils() {
         // Hide constructor.
