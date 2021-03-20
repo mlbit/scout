@@ -29,6 +29,8 @@ configurations {
 dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.27'
+
     implementation('com.weldbit.algo:algo:0.0.1')
     implementation('com.google.guava:guava:29.0-jre')
 

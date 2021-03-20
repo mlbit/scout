@@ -1,0 +1,69 @@
+
+---
+tablename: post 
+columns:
+  - name: prevposthash    # previous message hash
+    type: string
+    size: 32
+  - name: hash        # transaction hash derived from [prevhash, previous decrypted passphrase, content ]
+    type: string
+    size: 32
+  - name: passphrase   # encrypted and will be use to generate hash for next message
+    type: string
+    size: 64
+  - name: privacy 
+    type: number # represent the [private, public, limited] 
+    size: 3
+  - name: author # author address identifier 
+    type: string
+    size: 32
+  - name: message
+    type: string
+    size: 10
+    allownull: false
+searchkey: 
+  - name: primary    # SearchKey is primarily use when search records 
+    fieldnames: 
+      - id
+  - name: secondary    # SearchKey is primarily use when search records 
+    fieldnames: 
+      - id
+uniquekey:     # UniqueKey is use to prevent duplicate key
+  - name: primary
+    fieldnames:
+      - id    
+--- 
+tablename: reaction 
+columns:
+  - name: prevposthash    # previous message hash
+    type: string
+    size: 32
+  - name: hash        # transaction hash derived from [prevhash, previous decrypted passphrase, content ]
+    type: string
+    size: 32
+  - name: passphrase   # encrypted and will be use to generate hash for next message
+    type: string
+    size: 64
+  - name: privacy 
+    type: number # represent the [private, public, limited] 
+    size: 3
+  - name: author # author address identifier 
+    type: string
+    size: 32
+  - name: message
+    type: string
+    size: 10
+    allownull: false
+searchkey: 
+  - name: primary    # SearchKey is primarily use when search records 
+    fieldnames: 
+      - id
+  - name: secondary    # SearchKey is primarily use when search records 
+    fieldnames: 
+      - id
+uniquekey:     # UniqueKey is use to prevent duplicate key
+  - name: primary
+    fieldnames:
+      - id    
+      
+  

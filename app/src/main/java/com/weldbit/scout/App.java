@@ -4,23 +4,15 @@
 package com.weldbit.scout;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.*;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
 
-import com.weldbit.algo.stack.Stack;
-import com.weldbit.scout.storage.dao.DataAccessBase;
-import com.weldbit.scout.storage.dao.TableLedgerDAO;
 import com.weldbit.scout.storage.model.TableLedger;
+import com.weldbit.scout.storage.model.TableStructure;
+import com.weldbit.scout.storage.service.DataManagement;
 import com.weldbit.scout.storage.service.DataStorage;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import io.reactivex.Flowable;
-import io.reactivex.schedulers.Schedulers;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 public class App {
     public String getGreeting() {
@@ -28,6 +20,7 @@ public class App {
     }
 
     public static void main(String[] args) {
+        App app = new App();
         // System.out.println(new App().getGreeting());
         // HttpClient client = HttpClient.newHttpClient();
         // HttpRequest request =
@@ -63,19 +56,29 @@ public class App {
         // System.out.println("Stream below");
         // tableLedger.readTable();
 
-        TableLedger tLedger = new TableLedger();
-        tLedger.setTablename("what filename");
+        // TableLedger tLedger = new TableLedger();
+        // tLedger.setTablename("what filename");
 
-        try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger, DataStorage.ACCESS_TYPE.WRITE)) {
-            tblLedger.insert();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger, DataStorage.ACCESS_TYPE.WRITE)) {
-        //     tblLedger.insert();
+        // try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger,
+        // DataStorage.ACCESS_TYPE.WRITE)) {
+        // tblLedger.insert();
         // } catch (IOException e) {
-        //     e.printStackTrace();
+        // e.printStackTrace();
+        // }
+
+        DataManagement dataManagement = new DataManagement("datafile_meta/post.yml");
+        // Yaml yaml = new Yaml(new Constructor(TableStructure.class));
+        // InputStream inputStream =
+        // app.getClass().getClassLoader().getResourceAsStream("datafile_meta/post.yml");
+
+        // TableStructure tablestructure = yaml.load(inputStream);
+        // System.out.println(tablestructure.toString());
+
+        // try (DataStorage<TableLedger> tblLedger = new DataStorage<>(tLedger,
+        // DataStorage.ACCESS_TYPE.WRITE)) {
+        // tblLedger.insert();
+        // } catch (IOException e) {
+        // e.printStackTrace();
         // }
     }
 }
